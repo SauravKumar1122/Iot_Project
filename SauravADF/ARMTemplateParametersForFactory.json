@@ -1,0 +1,33 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "SauravADF"
+		},
+		"ls_dataflow_accountKey": {
+			"value": ""
+		},
+		"ls_iot_accountKey": {
+			"value": ""
+		},
+		"ls_lookup_accountKey": {
+			"value": ""
+		},
+		"ls_sql_connectionString": {
+			"value": ""
+		},
+		"ls_dataflow_properties_typeProperties_url": {
+			"value": "https://sauravadls.dfs.core.windows.net/"
+		},
+		"ls_http_properties_typeProperties_url": {
+			"value": "https://raw.githubusercontent.com"
+		},
+		"ls_iot_properties_typeProperties_url": {
+			"value": "https://iotstorageproj.dfs.core.windows.net/"
+		},
+		"ls_lookup_properties_typeProperties_url": {
+			"value": "https://sauravadls.dfs.core.windows.net/"
+		}
+	}
+}
