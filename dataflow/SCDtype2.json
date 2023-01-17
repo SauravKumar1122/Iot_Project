@@ -1,0 +1,153 @@
+{
+	"name": "SCDtype2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_emp_joinerssource",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_sql",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_sqlsink",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_sqlsink",
+						"type": "DatasetReference"
+					},
+					"name": "sink2"
+				}
+			],
+			"transformations": [
+				{
+					"name": "HashInput"
+				},
+				{
+					"name": "HashRef"
+				},
+				{
+					"name": "exists1"
+				},
+				{
+					"name": "SetToActive"
+				},
+				{
+					"name": "exists2"
+				},
+				{
+					"name": "setToInactive"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id as integer,",
+				"          name as string,",
+				"          dept as string,",
+				"          startdate as date 'MM-dd-yyyy'",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> source1",
+				"source(output(",
+				"          id as integer,",
+				"          name as string,",
+				"          dept as string,",
+				"          isActive as integer,",
+				"          startdate as date,",
+				"          enddate as date",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> source2",
+				"source1 derive(HASHinput = md5(name,dept)) ~> HashInput",
+				"source2 derive(HASHsql = md5(name,dept)) ~> HashRef",
+				"HashInput, HashRef exists(HASHinput == HASHsql,",
+				"     negate:true,",
+				"     broadcast: 'auto')~> exists1",
+				"exists1 derive(isActive = 1,",
+				"          enddate = 'NULL') ~> SetToActive",
+				"HashRef, HashInput exists(HASHsql == HASHinput,",
+				"     negate:false,",
+				"     broadcast: 'auto')~> exists2",
+				"exists2 derive(isActive = 0,",
+				"          enddate = toDate(currentUTC())) ~> setToInactive",
+				"setToInactive alterRow(updateIf(true())) ~> alterRow1",
+				"SetToActive sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id as integer,",
+				"          name as string,",
+				"          dept as string,",
+				"          isActive as integer,",
+				"          startdate as date,",
+				"          enddate as date",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id,",
+				"          name,",
+				"          dept,",
+				"          isActive,",
+				"          startdate,",
+				"          enddate",
+				"     )) ~> sink1",
+				"alterRow1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id as integer,",
+				"          name as string,",
+				"          dept as string,",
+				"          isActive as integer,",
+				"          startdate as date,",
+				"          enddate as date",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:false,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     keys:['id','name','dept'],",
+				"     skipKeyWrites:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id,",
+				"          name,",
+				"          dept,",
+				"          isActive,",
+				"          startdate,",
+				"          enddate",
+				"     )) ~> sink2"
+			]
+		}
+	}
+}

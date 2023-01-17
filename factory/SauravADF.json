@@ -1,0 +1,9 @@
+{
+	"name": "SauravADF",
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "f272ad7b-154a-4440-95ca-75b822fa5e5b",
+		"tenantId": "ab52d4e5-9cc7-437a-bdda-f4239e145187"
+	}
+}
